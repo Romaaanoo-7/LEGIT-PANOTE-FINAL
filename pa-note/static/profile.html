@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note App Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body
+<body class="bg-gray-100 relative min-h-screen flex flex-col items-center justify-center py-10">
+    <a href="Panote.html" 
+       class="absolute top-4 left-4 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 
+                    1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+        </svg>
+        Home
+    </a>
+
+    
+    <div class="w-full max-w-md bg-white shadow-lg rounded-lg overflow-hidden p-6 text-center">
+        <h1 class="text-2xl font-bold text-gray-800">Profile Page</h1>
+    </div>
+</body>
+
+    <div class="w-full max-w-md bg-white shadow-lg rounded-lg overflow-hidden">
+        <!-- Tab Navigation -->
+        <div class="flex border-b">
+            <button 
+                onclick="switchTab('view')" 
+                id="viewTab" 
+                class="w-full py-4 text-center font-medium transition-colors duration-300 tab-button active:bg-gray-200 view-tab"
+            >
+                View Profile
+            </button>
+            <button 
+                onclick="switchTab('edit')" 
+                id="editTab" 
+                class="w-full py-4 text-center font-medium transition-colors duration-300 tab-button active:bg-gray-200 edit-tab"
+            >
+                Edit Profile
+            </button>
+            <button 
+                onclick="switchTab('settings')" 
+                id="settingsTab" 
+                class="w-full py-4 text-center font-medium transition-colors duration-300 tab-button active:bg-gray-200 settings-tab"
+            >
+                User Settings
+            </button>
+        </div>
+
+        
+        <!-- Tab Content -->
+        <div id="tabContent" class="p-6">
+            <!-- View Profile Tab -->
+            <div id="viewProfileTab" class="tab-content">
+                <div class="flex flex-col items-center">
+                    <img 
+                        src="/api/placeholder/150/150" 
+                        alt="" 
+                        class="w-32 h-32 rounded-full mb-4 object-cover"
+                    >
+                    <h2 class="text-2xl font-bold text-gray-800"> Erol John "may balat sa pwet" Nool</h2>
+                    <div class="w-full mt-4">
+                        <div class="mb-2">
+                            <strong class="text-gray-700">Email:</strong>
+                            <p class="text-gray-600">ejsupotmaybalatsapwet@panotesapp.ph</p>
+                        </div>
+                        <div>
+                            <strong class="text-gray-700">Notes Created:</strong>
+                            <p class="text-gray-600">124 Notes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Profile Tab -->
+<div id="editProfileTab" class="tab-content hidden">
+    <form class="space-y-4">
+        <div>
+            <label class="block text-gray-700 mb-2" for="name">Full Name</label>
+            <input 
+                type="text" 
+                id="name" 
+                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value="  "
+            >
+        </div>
+        <div>
+            <label class="block text-gray-700 mb-2" for="email">Email</label>
+            <input 
+                type="email" 
+                id="email" 
+                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value=""
+            >
+        </div>
+        <div>
+            <button 
+    type="submit" 
+    class="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800 transition-colors"
+>
+    Save Profile Changes
+</button>
+
+        </div>
+    </form>
+</div>
+
+<!-- User Settings Tab -->
+<div id="userSettingsTab" class="tab-content hidden">
+    <div class="space-y-4">
+        <button 
+            onclick="updatePassword()"
+            class="w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 transition-colors text-xl"
+        >
+            Update Password
+        </button>
+
+        <div class="border-t pt-6">
+            <h4 class="text-xl font-semibold mb-4 text-gray-800">Account Switching</h4>
+            <button 
+                onclick="switchAccount()"
+                class="w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 transition-colors text-xl mb-4"
+            >
+                Switch Account
+            </button>
+            <button 
+                onclick="logout()"  A
+                class="w-full bg-black text-white py-3 rounded-md hover:bg-gray-800 transition-colors text-xl"
+            >
+                Logout
+            </button>
+        </div>
+    </div>
+</div>
+
+      
+        <script>
+            function updatePassword() {
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                // Basic validation
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    alert('Please fill in all password fields');
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    alert('New passwords do not match');
+                    return;
+                }
+
+        
+                alert('Password update functionality not implemented');
+            }
+
+            function switchAccount() {
+               
+                alert('Account switching functionality not implemented');
+            }
+
+            function logout() {
+                
+                alert('Logout functionality not implemented');
+            }
+        </script>
+
+        <script>
+            function switchTab(tabName) {
+                // Hide all tab contents
+                const tabContents = document.querySelectorAll('.tab-content');
+                tabContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+
+                // Remove active state from all tab buttons
+                const tabButtons = document.querySelectorAll('.tab-button');
+                tabButtons.forEach(button => {
+                    button.classList.remove('bg-blue-100', 'text-blue-700');
+                });
+
+                // Show selected tab content
+                const selectedTabContent = document.getElementById(
+                    tabName === 'settings' ? 'userSettingsTab' : `${tabName}ProfileTab`
+                );
+                selectedTabContent.classList.remove('hidden');
+
+                // Add active state to selected tab button
+                const selectedTabButton = document.getElementById(`${tabName}Tab`);
+                selectedTabButton.classList.add('bg-blue-100', 'text-blue-700');
+            }
+
+            // Set View Profile as default active tab
+            switchTab('view');
+        </script>
+    </div>
+</body>
+</html>

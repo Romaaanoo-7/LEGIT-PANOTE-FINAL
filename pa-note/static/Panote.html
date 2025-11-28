@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pa-Note</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../template/style.css">
+    <style>
+        .hidden {
+            display: none !important;
+        }
+        
+        .note-card:hover .note-content.hidden {
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Vertical Navigation Bar -->
+    <div class="menu">
+        <a href="#" class="link active">
+            <span class="link-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" fill="currentColor" viewBox="0 0 256 256">
+                    <rect width="256" height="256" fill="none"></rect>
+                    <path d="M213.3815,109.61945,133.376,36.88436a8,8,0,0,0-10.76339.00036l-79.9945,72.73477A8,8,0,0,0,40,115.53855V208a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V115.53887A8,8,0,0,0,213.3815,109.61945Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                </svg>
+            </span>
+            <span class="link-title">Home</span>
+        </a>
+        <a href="#" class="link">
+            <span class="link-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" fill="currentColor" viewBox="0 0 256 256">
+                    <rect width="256" height="256" fill="none"></rect>
+                    <path d="M45.42853,176.99811A95.95978,95.95978,0,1,1,79.00228,210.5717l.00023-.001L45.84594,220.044a8,8,0,0,1-9.89-9.89l9.47331-33.15657Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                    <line x1="96" y1="112" x2="160" y2="112" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                    <line x1="96" y1="144" x2="160" y2="144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                </svg>
+            </span>
+            <span class="link-title">Notes</span>
+        </a>
+        <a href="#" class="link">
+            <span class="link-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" fill="currentColor" viewBox="0 0 256 256">
+                    <rect width="256" height="256" fill="none"></rect>
+                    <circle cx="116" cy="116" r="84" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></circle>
+                    <line x1="175.39356" y1="175.40039" x2="223.99414" y2="224.00098" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></line>
+                </svg>
+            </span>
+            <span class="link-title">Search</span>
+        </a>
+        <a href="#" class="link">
+            <span class="link-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" fill="currentColor" viewBox="0 0 256 256">
+                    <rect width="256" height="256" fill="none"></rect>
+                    <circle cx="128" cy="96" r="64" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="16"></circle>
+                    <path d="M30.989,215.99064a112.03731,112.03731,0,0,1,194.02311.002" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></path>
+                </svg>
+            </span>
+            <span class="link-title">Profile</span>
+        </a>
+        <a href="#" class="link" id="night-mode-toggle">
+            <span class="link-icon">
+                <label class="switch">
+                    <input type="checkbox" id="night-mode-checkbox">
+                    <span class="slider">
+                        <div class="star star_1"></div>
+                        <div class="star star_2"></div>
+                        <div class="star star_3"></div>
+                        <svg viewBox="0 0 16 16" class="cloud_1 cloud">
+                            <path transform="matrix(.77976 0 0 .78395-299.99-418.63)" fill="#fff" d="m391.84 540.91c-.421-.329-.949-.524-1.523-.524-1.351 0-2.451 1.084-2.485 2.435-1.395.526-2.388 1.88-2.388 3.466 0 1.874 1.385 3.423 3.182 3.667v.034h12.73v-.006c1.775-.104 3.182-1.584 3.182-3.395 0-1.747-1.309-3.186-2.994-3.379.007-.106.011-.214.011-.322 0-2.707-2.271-4.901-5.072-4.901-2.073 0-3.856 1.202-4.643 2.925"></path>
+                        </svg>
+                    </span>
+                </label>
+            </span>
+        </a>
+            <span class="link-title">Night Mode</span>
+        </a>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <header>
+                <h1>
+                    <img src="../elements/PanotePencil.svg" alt="Pa-Note" style="height: 125px; vertical-align: middle; margin: 20px;">
+                </h1> 
+                <div class="header-buttons">
+                    <button class="header-button new-note-btn" onclick="toggleNoteForm()">+ New Note</button>
+                    <button class="header-button delete-all-btn" onclick="deleteAllNotes()">Delete All</button>
+                </div>
+            </header>
+
+            <!-- Note Creation/Edit Form -->
+            <div id="note-form" class="note-form hidden">
+                <div class="note-header">
+                    <input type="text" id="note-title" placeholder="Note Title" class="note-input">
+                </div>
+                <!-- Formatting Toolbar -->
+                <div class="formatting-toolbar">
+                    <div class="left-tools">
+                        <select class="format-select" id="font-family">
+                            <option value="'Segoe UI'">Segoe UI</option>
+                            <option value="Arial">Arial</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="Twelny">Twelny</option>
+                        </select>
+                        <select class="format-select" id="font-size">
+                            <option value="12px">12</option>
+                            <option value="14px">14</option>
+                            <option value="16px">16</option>
+                            <option value="18px">18</option>
+                            <option value="20px">20</option>
+                            <option value="24px">24</option>
+                        </select>
+                        <input type="color" id="font-color" value="#000000" class="color-picker">
+                    </div>
+                    <div class="right-tools">
+                        <button class="format-btn" id="bold-btn">
+                            <span class="tooltip">Bold</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8.21 13c2.106 0 3.412-1.087 3.412-2.823 0-1.306-.984-2.283-2.324-2.386v-.055c1.143-.188 1.904-1.235 1.904-2.336 0-1.51-1.162-2.4-3.012-2.4H3.843V13zM5.908 4.674h1.696c.963 0 1.517.451 1.517 1.244 0 .834-.629 1.32-1.73 1.32H5.908V4.673zm0 6.788V8.598h1.73c1.217 0 1.88.492 1.88 1.415 0 .943-.643 1.449-1.832 1.449H5.907z"/>
+                            </svg>
+                        </button>
+                        <button class="format-btn" id="italic-btn">
+                            <span class="tooltip">Italic</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M7.991 11.674 9.53 4.455c.123-.595.246-.71 1.347-.807l.11-.52H7.211l-.11.52c1.06.096 1.128.212 1.005.807L6.57 11.674c-.123.595-.246.71-1.346.806l-.11.52h3.774l.11-.52c-1.06-.095-1.129-.211-1.006-.806z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="note-body">
+                    <textarea id="note-content" placeholder="Write your note here..." class="note-textarea"></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button onclick="saveNote()" class="save-btn button">Save Note</button>
+                    <button onclick="toggleNoteForm()" class="cancel-btn button">Cancel</button>
+                </div>
+            </div>
+            
+            <div class="notes-grid" id="notes-container">
+                <!-- Notes will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Night Mode Toggle
+        const nightModeToggle = document.getElementById('night-mode-checkbox');
+        const body = document.body;
+        const headerLogo = document.querySelector('header h1 img');
+        
+        // Add transition to the logo
+        headerLogo.style.transition = 'opacity 0.3s ease-in-out';
+        
+        // Check if night mode preference is saved in localStorage
+        const isNightMode = localStorage.getItem('nightMode') === 'true';
+        if (isNightMode) {
+            body.classList.add('night-mode');
+            nightModeToggle.checked = true;
+            headerLogo.src = '../elements/PanotePencilDark.svg';
+        }
+        
+        nightModeToggle.addEventListener('change', (e) => {
+            body.classList.toggle('night-mode');
+            
+            // Animate logo change
+            headerLogo.style.opacity = '0';
+            setTimeout(() => {
+                headerLogo.src = body.classList.contains('night-mode') 
+                    ? '../elements/PanotePencilDark.svg' 
+                    : '../elements/PanotePencil.svg';
+                headerLogo.style.opacity = '1';
+            }, 300);
+            
+            localStorage.setItem('nightMode', body.classList.contains('night-mode'));
+        });
+
+        let notes = JSON.parse(localStorage.getItem('notes') || '[]');
+        let currentEditingId = null;
+
+        function generateUniqueId() {
+            return Date.now() + Math.random().toString(36).substr(2, 9);
+        }
+
+        function toggleNoteForm(noteId = null) {
+            const form = document.getElementById('note-form');
+            const notesGrid = document.getElementById('notes-container');
+            
+            if (form.classList.contains('hidden')) {
+                // Opening the form
+                notesGrid.classList.add('hidden');
+                setTimeout(() => {
+                    form.classList.remove('hidden');
+                }, 100);
+                
+                if (noteId) {
+                    const note = notes.find(n => n.id === noteId);
+                    if (note) {
+                        document.getElementById('note-title').value = note.title;
+                        document.getElementById('note-content').value = note.content;
+                        currentEditingId = noteId;
+                    }
+                }
+            } else {
+                // Closing the form
+                form.classList.add('hidden');
+                setTimeout(() => {
+                    notesGrid.classList.remove('hidden');
+                    // Reset form
+                    document.getElementById('note-title').value = '';
+                    document.getElementById('note-content').value = '';
+                    currentEditingId = null;
+                    
+                    // Reset all formatting
+                    const textarea = document.getElementById('note-content');
+                    textarea.style = '';
+                    
+                    // Reset form controls
+                    document.getElementById('font-family').value = "'Segoe UI'";
+                    document.getElementById('font-size').value = '16px';
+                    document.getElementById('font-color').value = '#000000';
+                }, 300);
+            }
+        }
+
+        function saveNote() {
+            const title = document.getElementById('note-title').value;
+            const content = document.getElementById('note-content').value;
+            
+            if (!title || !content) {
+                alert('Please fill in both title and content!');
+                return;
+            }
+
+            if (currentEditingId) {
+                const index = notes.findIndex(note => note.id === currentEditingId);
+                if (index !== -1) {
+                    notes[index] = {
+                        ...notes[index],
+                        title,
+                        content,
+                        lastEdited: new Date().toLocaleDateString()
+                    };
+                }
+            } else {
+                notes.push({
+                    id: generateUniqueId(),
+                    title,
+                    content,
+                    date: new Date().toLocaleDateString(),
+                    lastEdited: null
+                });
+            }
+
+            localStorage.setItem('notes', JSON.stringify(notes));
+            currentEditingId = null;
+            toggleNoteForm();
+            displayNotes();
+        }
+
+        function deleteNote(id) {
+            if (confirm('Are you sure you want to delete this note?')) {
+                notes = notes.filter(note => note.id !== id);
+                localStorage.setItem('notes', JSON.stringify(notes));
+                displayNotes();
+            }
+        }
+
+        function deleteAllNotes() {
+            if (confirm('Are you sure you want to delete all notes? This cannot be undone.')) {
+                notes = [];
+                localStorage.setItem('notes', JSON.stringify(notes));
+                displayNotes();
+            }
+        }
+
+        function displayNotes() {
+            const container = document.getElementById('notes-container');
+            container.innerHTML = notes.map(note => `
+                <div class="note-card">
+                    <div class="cover">
+                        <p>${note.title}</p>
+                    </div>
+                    <div class="note-content hidden">
+                        ${note.content}
+                        <div class="note-footer">
+                            <div class="note-info">
+                                <span class="date">Created: ${note.date}</span>
+                                ${note.lastEdited ? `<span class="date">Edited: ${note.lastEdited}</span>` : ''}
+                            </div>
+                            <div class="actions">
+                                <button type="button" class="icon-btn edit-btn" onclick="toggleNoteForm('${note.id}')" aria-label="Edit note">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                                <button type="button" class="icon-btn delete-btn" onclick="deleteNote('${note.id}')" aria-label="Delete note">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add hover event listeners to note cards
+            document.querySelectorAll('.note-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.querySelector('.note-content').classList.remove('hidden');
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.querySelector('.note-content').classList.add('hidden');
+                });
+            });
+        }
+
+        // Add state tracking for formatting
+        let isBoldActive = false;
+        let isItalicActive = false;
+
+        // Additional formatting controls
+        document.getElementById('bold-btn').addEventListener('click', () => {
+            const textarea = document.getElementById('note-content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            
+            isBoldActive = !isBoldActive;
+            document.getElementById('bold-btn').classList.toggle('active');
+            
+            if (start === end) {
+                // No text selected, just toggle the state for future typing
+                return;
+            }
+            
+            // If text is selected, wrap it in bold tags
+            const selectedText = textarea.value.substring(start, end);
+            const beforeText = textarea.value.substring(0, start);
+            const afterText = textarea.value.substring(end);
+            textarea.value = beforeText + `<b>${selectedText}</b>` + afterText;
+        });
+
+        document.getElementById('italic-btn').addEventListener('click', () => {
+            const textarea = document.getElementById('note-content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            
+            isItalicActive = !isItalicActive;
+            document.getElementById('italic-btn').classList.toggle('active');
+            
+            if (start === end) {
+                // No text selected, just toggle the state for future typing
+                return;
+            }
+            
+            // If text is selected, wrap it in italic tags
+            const selectedText = textarea.value.substring(start, end);
+            const beforeText = textarea.value.substring(0, start);
+            const afterText = textarea.value.substring(end);
+            textarea.value = beforeText + `<i>${selectedText}</i>` + afterText;
+        });
+
+        document.getElementById('underline-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            e.target.closest('.format-btn').classList.toggle('active');
+            document.getElementById('note-content').style.textDecoration = 
+                document.getElementById('note-content').style.textDecoration === 'underline' ? 'none' : 'underline';
+        });
+
+        document.getElementById('align-left').addEventListener('click', (e) => {
+            e.preventDefault();
+            removeAlignActive();
+            e.target.closest('.format-btn').classList.add('active');
+            document.getElementById('note-content').style.textAlign = 'left';
+        });
+
+        document.getElementById('align-center').addEventListener('click', (e) => {
+            e.preventDefault();
+            removeAlignActive();
+            e.target.closest('.format-btn').classList.add('active');
+            document.getElementById('note-content').style.textAlign = 'center';
+        });
+
+        document.getElementById('align-right').addEventListener('click', (e) => {
+            e.preventDefault();
+            removeAlignActive();
+            e.target.closest('.format-btn').classList.add('active');
+            document.getElementById('note-content').style.textAlign = 'right';
+        });
+
+        function removeAlignActive() {
+            document.querySelectorAll('#align-left, #align-center, #align-right')
+                .forEach(btn => btn.classList.remove('active'));
+        }
+
+        document.getElementById('font-family').addEventListener('change', (e) => {
+            document.getElementById('note-content').style.fontFamily = e.target.value;
+        });
+
+        document.getElementById('font-size').addEventListener('change', (e) => {
+            document.getElementById('note-content').style.fontSize = e.target.value;
+        });
+
+        document.getElementById('font-color').addEventListener('input', (e) => {
+            document.getElementById('note-content').style.color = e.target.value;
+        });
+
+        // Display notes on page load
+        displayNotes();
+    </script>
+</body>
+</html>

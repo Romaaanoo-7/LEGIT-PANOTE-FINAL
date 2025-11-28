@@ -1,0 +1,892 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    background-color: white;
+    color: #000;
+    display: flex;
+    transition: all 0.3s ease;
+}
+
+/* Add custom font */
+@font-face {
+    font-family: 'Twelny';
+    src: url('../elements/Twelny-8OOVA.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Vertical Navigation Bar */
+.menu {
+    width: 60px;
+    height: 100vh;
+    background-color: #000;
+    padding: 1.5rem 0;
+    position: fixed;
+    transition: width 0.3s ease, all 0.3s ease;
+    overflow: hidden;
+    color: white;
+    z-index: 1000;
+}
+
+.menu:hover {
+    width: 180px;
+    z-index: 1001;
+}
+
+.link {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s, all 0.3s ease;
+    white-space: nowrap;
+    justify-content: flex-start;
+}
+
+.link:hover, .link.active {
+    background-color: #333;
+}
+
+.link-icon {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.link-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.menu:hover .link {
+    padding: 0.6rem 1rem;
+}
+
+.menu:hover .link-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-right: 0.8rem;
+}
+
+.menu:hover .link-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.link-title {
+    margin-left: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 1rem;
+}
+
+.menu:hover .link-title {
+    opacity: 1;
+}
+
+/* Style the Pa-Note title */
+.link.active .link-title {
+    font-family: 'Twelny', sans-serif;
+    font-weight: normal;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    margin-left: 60px;
+    width: calc(100% - 60px);
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: white;
+    min-height: 100vh;
+    transition: all 0.3s ease;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+header h1 {
+    font-family: 'Twelny', sans-serif;
+    font-size: 2.5rem;
+    font-weight: normal;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+/* From Uiverse.io by e-coders */ 
+button {
+    appearance: none;
+    background-color: transparent;
+    border: 0.125em solid #000;
+    border-radius: 0.9375em;
+    box-sizing: border-box;
+    color: #000;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Roobert,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    font-size: 16px;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0;
+    min-height: 3.75em;
+    min-width: 0;
+    outline: none;
+    padding: 1em 2.3em;
+    text-align: center;
+    text-decoration: none;
+    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    will-change: transform;
+}
+
+button:disabled {
+    pointer-events: none;
+}
+
+button:hover {
+    color: #fff;
+    background-color: #000;
+    box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+    transform: translateY(-2px);
+}
+
+button:active {
+    box-shadow: none;
+    transform: translateY(0);
+}
+
+.new-note-btn, .delete-all-btn {
+    background-color: #000;
+    color: white;
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.new-note-btn:hover {
+    background-color: #333;
+}
+
+.delete-all-btn:hover {
+    background-color: #ff4444;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Note Form Styles */
+.note-form {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    transform-origin: top;
+}
+
+.note-form.hidden {
+    transform: scale(0.8);
+    opacity: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+}
+
+.notes-grid {
+    opacity: 1;
+    transform: scale(1);
+    transition: all 0.3s ease-in-out;
+}
+
+.notes-grid.hidden {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+}
+
+.note-textarea {
+    width: 100%;
+    min-height: 500px;
+    padding: 15px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1.6;
+    resize: vertical;
+}
+
+.note-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+/* Night mode support */
+.night-mode .note-form {
+    background: #2d2d2d;
+}
+
+.night-mode .note-textarea,
+.night-mode .note-input {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #444;
+}
+
+.note-input:focus, .note-textarea:focus {
+    outline: none;
+    border-color: #000;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    transition: all 0.3s ease;
+}
+
+.note-card {
+    position: relative;
+    border-radius: 10px;
+    width: 300px;
+    min-height: 400px;
+    height: auto;
+    background-color: whitesmoke;
+    box-shadow: 1px 1px 12px rgba(0, 0, 0, 0.3);
+    transform-style: preserve-3d;
+    perspective: 2000px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    color: #000;
+    border: 1px solid #000;
+    transition: all 0.5s ease;
+}
+
+.note-card:hover {
+    height: fit-content;
+}
+
+.note-content {
+    padding: 1.5rem;
+    width: 100%;
+    height: auto;
+    position: relative;
+    display: block;
+    text-align: left;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    overflow: visible;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    z-index: 2;
+    transform: translateZ(1px);
+    min-height: 100%;
+}
+
+.note-card:hover .note-content {
+    opacity: 1;
+}
+
+.cover {
+    top: 0;
+    position: absolute;
+    background-color: white;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.5s;
+    transform-origin: left;
+    box-shadow: 1px 1px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #000;
+    transform: rotateY(0deg);
+    backface-visibility: hidden;
+}
+
+.note-card:hover .cover {
+    transform: rotateY(-180deg);
+}
+
+.note-content {
+    padding: 1.5rem;
+    width: 100%;
+    height: auto;
+    position: relative;
+    display: block;
+    text-align: left;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    overflow: visible;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    z-index: 2;
+    transform: translateZ(1px);
+    min-height: 100%;
+}
+
+.note-card:hover .note-content {
+    opacity: 1;
+}
+
+.cover {
+    top: 0;
+    position: absolute;
+    background-color: white;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.5s;
+    transform-origin: 0;
+    box-shadow: 1px 1px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.note-card:hover .cover {
+    transition: all 0.5s;
+    transform: rotatey(-80deg);
+}
+
+.cover p {
+    font-size: 20px;
+    font-weight: bolder;
+}
+
+/* Night Mode Support */
+.night-mode .note-card {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.night-mode .cover {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+.night-mode .note-card h3 {
+    color: #ffffff;
+}
+
+.note-card p {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.note-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.note-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    color: #666;
+}
+
+.date {
+    font-size: 0.9rem;
+    color: #666;
+    margin-right: 1rem;
+}
+
+.actions {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.icon-btn {
+    min-height: unset;
+    padding: 0.5em;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2px solid #ddd;
+    background: transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+}
+
+.icon-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    pointer-events: none;
+}
+
+.edit-btn svg {
+    stroke-width: 1.5;
+}
+
+.delete-btn svg {
+    stroke-width: 0.1;
+    fill: currentColor;
+}
+
+.edit-btn:hover {
+    border-color: #000;
+    background-color: #000;
+    color: white;
+}
+
+.delete-btn:hover {
+    border-color: #ff4444;
+    background-color: #ff4444;
+    color: white;
+}
+
+.icon-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.icon-btn:hover svg {
+    stroke: #000;
+}
+
+.icon-btn i {
+    font-size: 1.2rem;
+}
+
+.icon-btn:hover i {
+    transform: scale(1.1);
+}
+
+.delete-btn:hover {
+    border-color: #ff0000;
+    background-color: #ff0000;
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+/* Night Mode Styles */
+body.night-mode {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.night-mode {
+    background-color: #000000;
+}
+
+.night-mode .menu {
+    background-color: #ffffff;
+}
+
+.night-mode .menu .link {
+    color: #000000;
+}
+
+.night-mode .menu .link:hover, 
+.night-mode .menu .link.active {
+    background-color: #f5f5f5;
+    color: #000000;
+}
+
+.night-mode .menu .link-icon svg {
+    fill: #000000;
+}
+
+.night-mode .menu .link:hover .link-icon svg,
+.night-mode .menu .link.active .link-icon svg {
+    fill: #000000;
+}
+
+.night-mode .menu .link-title {
+    color: #000000;
+}
+
+.night-mode .menu .link:hover .link-title,
+.night-mode .menu .link.active .link-title {
+    color: #000000;
+}
+
+/* Dark mode toggle icon color */
+.night-mode #night-mode-toggle .link-icon svg {
+    fill: #000000;
+}
+
+.night-mode #night-mode-toggle .link-icon svg circle,
+.night-mode #night-mode-toggle .link-icon svg path {
+    stroke: #000000;
+}
+
+/* Main Content Area */
+.night-mode .main-content {
+    background-color: #000000;
+}
+
+.night-mode .container {
+    background-color: #000000;
+}
+
+.night-mode .note-form {
+    background-color: #000000;
+    border: 1px solid #ffffff;
+}
+
+.night-mode .note-form .note-header {
+    border-bottom-color: #ffffff;
+}
+
+.night-mode .note-input,
+.night-mode .note-textarea {
+    background-color: #000000;
+    border: 1px solid #ffffff;
+    color: #ffffff;
+}
+
+.night-mode .notes-grid {
+    background-color: #000000;
+}
+
+.night-mode .note-card {
+    background-color: #000000;
+    border: 1px solid #ffffff;
+}
+
+.night-mode .note-card h3 {
+    color: #ffffff;
+}
+
+.night-mode .note-card p {
+    color: #ffffff;
+}
+
+.night-mode .note-info {
+    color: #ffffff;
+}
+
+.night-mode .icon-btn {
+    color: #ffffff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .notes-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .note-form {
+        margin: 1rem;
+        max-width: 100%;
+    }
+    
+    .note-header {
+        padding: 1rem;
+    }
+    
+    .note-body {
+        padding: 1rem;
+    }
+    
+    .form-buttons {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 768px) {
+    .night-mode .container {
+        background-color: #000000;
+    }
+    
+    .night-mode .note-form {
+        background-color: #000000;
+    }
+    
+    .night-mode .note-header {
+        border-bottom-color: #ffffff;
+    }
+    
+    .night-mode .main-content {
+        background-color: #000000;
+    }
+}
+
+@keyframes nightModeTransition {
+    0% {
+        background-color: #ffffff;
+        color: #000000;
+    }
+    100% {
+        background-color: #000000;
+        color: #ffffff;
+    }
+}
+
+/* Formatting Toolbar Styles */
+.formatting-toolbar {
+    padding: 10px;
+    border-bottom: 1px solid #000;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: #f5f5f5;
+    justify-content: space-between;
+}
+
+.formatting-toolbar .left-tools {
+    display: inline-flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 10px;
+    align-items: center;
+}
+
+.formatting-toolbar .right-tools {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.formatting-toolbar .format-btn {
+    position: relative;
+    background: #fff;
+    border-radius: 50%;
+    margin: 0;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border: none;
+}
+
+.formatting-toolbar .format-btn .tooltip {
+    position: absolute;
+    top: 0;
+    font-size: 14px;
+    background: #fff;
+    color: #fff;
+    padding: 5px 8px;
+    border-radius: 5px;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.formatting-toolbar .format-btn .tooltip::before {
+    position: absolute;
+    content: "";
+    height: 8px;
+    width: 8px;
+    background: #fff;
+    bottom: -3px;
+    left: 50%;
+    transform: translate(-50%) rotate(45deg);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.formatting-toolbar .format-btn:hover .tooltip {
+    top: -45px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.formatting-toolbar .format-btn:hover,
+.formatting-toolbar .format-btn:hover .tooltip,
+.formatting-toolbar .format-btn:hover .tooltip::before {
+    background: #000;
+    color: #fff;
+}
+
+.format-select {
+    padding: 5px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 100px;
+}
+
+.color-picker {
+    padding: 2px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    width: 40px;
+    height: 30px;
+    cursor: pointer;
+}
+
+/* Night Mode Support */
+.night-mode .formatting-toolbar {
+    background: #333;
+    border-bottom-color: #fff;
+}
+
+.night-mode .format-select,
+.night-mode .color-picker {
+    background: #222;
+    color: #fff;
+    border-color: #fff;
+}
+/* Theme Switch */
+.switch {
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: 4em;
+  height: 2.2em;
+  border-radius: 30px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2a2a2a;
+  transition: 0.4s;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.2em;
+  width: 1.2em;
+  border-radius: 20px;
+  left: 0.5em;
+  bottom: 0.5em;
+  transition: 0.4s;
+  transition-timing-function: cubic-bezier(0.81, -0.04, 0.38, 1.5);
+  box-shadow: inset 8px -4px 0px 0px #fff;
+}
+
+.switch input:checked + .slider {
+  background-color: #00a6ff;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(1.8em);
+  box-shadow: inset 15px -4px 0px 15px #ffcf48;
+}
+
+.star {
+  background-color: #fff;
+  border-radius: 50%;
+  position: absolute;
+  width: 5px;
+  transition: all 0.4s;
+  height: 5px;
+}
+
+.star_1 {
+  left: 2.5em;
+  top: 0.5em;
+}
+
+.star_2 {
+  left: 2.2em;
+  top: 1.2em;
+}
+
+.star_3 {
+  left: 3em;
+  top: 0.9em;
+}
+
+.switch input:checked ~ .slider .star {
+  opacity: 0;
+}
+
+.cloud {
+  width: 3.5em;
+  position: absolute;
+  bottom: -1.4em;
+  left: -1.1em;
+  opacity: 0;
+  transition: all 0.4s;
+}
+
+.switch input:checked ~ .slider .cloud {
+  opacity: 1;
+}

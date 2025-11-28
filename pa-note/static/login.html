@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pa-note - Login</title>
+    <link rel="stylesheet" href="../template/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="theme-toggle">
+        <label class="switch">
+            <input type="checkbox" id="theme-checkbox">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <div class="container">
+        <div class="card fade-in">
+            <div class="logo-container">
+                <img src="../elements/PanotePencil.svg" alt="Pa-note Logo" class="logo" id="logo">
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form">
+                <h2>Welcome Back</h2>
+                <p class="subtitle">Login to access your notes</p>
+
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" placeholder="Enter your username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="login-password" placeholder="Enter your password" required>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('login-password', this)"></i>
+                        </div>
+                        <div class="error-message" id="login-error">Invalid username or password</div>
+                    </div>
+
+                    <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
+
+                    <button type="submit" class="btn btn-primary" id="login-btn">
+                        <span>Login</span>
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <button class="btn btn-google">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+                        class="google-icon">
+                    <span>Login with Google</span>
+                </button>
+
+                <div class="footer-links">
+                    Don't have an account? <a onclick="switchForm('register')">Register</a>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" class="hidden">
+                <h2>Create Account</h2>
+                <p class="subtitle">Join Pa-note today</p>
+
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="register-username">Username</label>
+                        <input type="text" id="register-username" placeholder="Choose a username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <div class="password-container">
+                            <input type="password" id="register-password" placeholder="Create a password" required>
+                            <i class="fas fa-eye toggle-password"
+                                onclick="togglePassword('register-password', this)"></i>
+                        </div>
+                        <div class="error-message" id="register-error">Error creating account</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="register-btn">
+                        <span>Register</span>
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <button class="btn btn-google">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+                        class="google-icon">
+                    <span>Register with Google</span>
+                </button>
+
+                <div class="footer-links">
+                    Already have an account? <a onclick="switchForm('login')">Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+
+</html>
