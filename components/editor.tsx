@@ -223,7 +223,7 @@ export function Editor({
                 <div className="mx-auto flex w-full max-w-3xl flex-col p-8">
                     <Input
                         className="mb-4 border-none bg-transparent text-4xl font-bold shadow-none focus-visible:ring-0 px-0"
-                        placeholder="New page"
+                        placeholder="Title"
                         value={note.title}
                         onChange={(e) => onUpdateNote(e.target.value, note.content)}
                         disabled={isTrash}

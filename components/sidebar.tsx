@@ -212,7 +212,7 @@ export function Sidebar({
                                 onClick={() => onSelectNote(note.id)}
                             >
                                 <div className="flex items-center justify-between">
-                                    <span className="font-medium line-clamp-1">{note.title || "New Page"}</span>
+                                    <span className="font-medium line-clamp-1">{note.title || "Title"}</span>
                                     <Button
                                         variant="ghost"
                                         size="icon"

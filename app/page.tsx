@@ -23,7 +23,7 @@ export default function Home() {
 
   // Note State
   const [notes, setNotes] = React.useState<Note[]>([
-    { id: '1', title: 'New Page', content: 'This is your text.', date: new Date().toLocaleDateString(), pinned: false, trashed: false },
+    { id: '1', title: 'Title', content: 'This is your text.', date: new Date().toLocaleDateString(), pinned: false, trashed: false },
     { id: '2', title: 'Class Notes', content: 'ABCD.', date: new Date().toLocaleDateString(), pinned: false, trashed: false }
   ]);
   const [currentNoteId, setCurrentNoteId] = React.useState<string>('1');
@@ -50,7 +50,7 @@ export default function Home() {
   const handleAddNote = () => {
     const newNote: Note = {
       id: Date.now().toString(),
-      title: 'New Page',
+      title: 'Title',
       content: '',
       date: new Date().toLocaleDateString(),
       pinned: false,

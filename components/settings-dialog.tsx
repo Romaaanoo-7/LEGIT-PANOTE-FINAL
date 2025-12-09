@@ -21,7 +21,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
             <DialogContent className="sm:max-w-[425px] bg-card text-card-foreground border-border">
                 <DialogHeader className="flex flex-row items-center justify-between border-b pb-4">
                     <DialogTitle>Settings</DialogTitle>
-
+                    0
                 </DialogHeader>
                 <div className="py-6">
                     <div className="space-y-4">
