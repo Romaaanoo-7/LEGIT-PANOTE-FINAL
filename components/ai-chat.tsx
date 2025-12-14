@@ -28,39 +28,27 @@ interface Note {
     title: string;
 }
 
+interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+    attachments?: string[];
+}
+
 interface AIChatProps {
     onAddToNote?: (text: string, noteId?: string) => void;
     notes?: Note[];
+    messages: ChatMessage[];
+    onUpdateMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
 }
 
-export function AIChat({ onAddToNote, notes }: AIChatProps) {
+export function AIChat({ onAddToNote, notes, messages, onUpdateMessages: setMessages }: AIChatProps) {
     const [input, setInput] = React.useState("");
-    const [messages, setMessages] = React.useState<{ role: 'user' | 'assistant', content: string, attachments?: string[] }[]>([]);
     const [attachments, setAttachments] = React.useState<string[]>([]);
     const [isConverting, setIsConverting] = React.useState(false);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const imageToTextInputRef = React.useRef<HTMLInputElement>(null);
 
-    React.useEffect(() => {
-        const fetchMessages = async () => {
-            try {
-                const res = await fetch('/api/chat');
-                if (res.ok) {
-                    const data = await res.json();
-                    // Transform DB messages to UI messages
-                    const uiMessages = data.map((m: any) => ({
-                        role: m.role,
-                        content: m.content,
-                        attachments: m.attachments
-                    }));
-                    setMessages(uiMessages);
-                }
-            } catch (e) {
-                console.error("Failed to load chat history", e);
-            }
-        };
-        fetchMessages();
-    }, []);
+    // useEffect removed - state managed by parent
 
     const saveMessage = async (role: 'user' | 'assistant', content: string, attachments?: string[]) => {
         try {

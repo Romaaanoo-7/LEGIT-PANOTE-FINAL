@@ -21,6 +21,12 @@ interface Note {
   tag_id?: string;
 }
 
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  attachments?: string[];
+}
+
 export default function Home() {
   const [currentView, setCurrentView] = React.useState<"notes" | "ai" | "trash" | "settings">("notes");
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
@@ -30,6 +36,7 @@ export default function Home() {
   const [tags, setTags] = React.useState<Tag[]>([]);
   const [notes, setNotes] = React.useState<Note[]>([]);
   const [trashNotes, setTrashNotes] = React.useState<Note[]>([]);
+  const [chatMessages, setChatMessages] = React.useState<ChatMessage[]>([]);
   const [currentNoteId, setCurrentNoteId] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -37,10 +44,11 @@ export default function Home() {
   const fetchData = React.useCallback(async () => {
     setIsLoading(true);
     try {
-      const [notesRes, tagsRes, trashRes] = await Promise.all([
+      const [notesRes, tagsRes, trashRes, chatRes] = await Promise.all([
         fetch('/api/notes'),
         fetch('/api/tags'),
-        fetch('/api/trash')
+        fetch('/api/trash'),
+        fetch('/api/chat')
       ]);
 
       if (notesRes.ok) {
@@ -71,6 +79,15 @@ export default function Home() {
           pinned: n.is_pinned,
           trashed: true,
           tag_id: n.tag_id
+        })));
+      }
+
+      if (chatRes.ok) {
+        const data = await chatRes.json();
+        setChatMessages(data.map((m: any) => ({
+          role: m.role,
+          content: m.content,
+          attachments: m.attachments
         })));
       }
     } catch (error) {
@@ -365,7 +382,7 @@ export default function Home() {
             </div>
           )
         )}
-        {currentView === "ai" && <AIChat onAddToNote={handleAddToNoteFromChat} notes={notes} />}
+        {currentView === "ai" && <AIChat onAddToNote={handleAddToNoteFromChat} notes={notes} messages={chatMessages} onUpdateMessages={setChatMessages} />}
       </main>
       <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </div>
