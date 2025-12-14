@@ -3,7 +3,8 @@ import { Advent_Pro, Fira_Code } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/auth-context";
 // 1. Import the ThemeProvider you created
-import { ThemeProvider } from "@/components/ui/themeprovider";
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { ModeToggle } from "@/components/mode-toggle";
 
 const adventPro = Advent_Pro({
   variable: "--font-advent-pro",
