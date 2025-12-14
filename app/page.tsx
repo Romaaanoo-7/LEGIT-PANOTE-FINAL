@@ -33,7 +33,7 @@ export default function Home() {
     }
   };
 
-  // Tag Handlers - now operating on the current note
+  // Tag Handlers
   const handleAddTag = (tag: string) => {
     const trimmedTag = tag.trim();
     if (!trimmedTag || !currentNoteId) return;
@@ -48,7 +48,7 @@ export default function Home() {
     }));
   };
 
-  const handleDeleteTag = (tagToDelete: string) => {
+  const handleRemoveTagFromNote = (tagToDelete: string) => {
     if (!currentNoteId) return;
 
     setNotes(notes.map(note => {
@@ -57,6 +57,14 @@ export default function Home() {
       }
       return note;
     }));
+  };
+
+  // Global delete for sidebar
+  const handleDeleteTagGlobally = (tagToDelete: string) => {
+    setNotes(notes.map(note => ({
+      ...note,
+      tags: note.tags.filter(t => t !== tagToDelete)
+    })));
   };
 
   // Derive all unique tags from all notes for the sidebar
@@ -145,7 +153,7 @@ export default function Home() {
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             tags={allTags}
             onAddTag={handleAddTag}
-            onDeleteTag={handleDeleteTag}
+            onDeleteTag={handleRemoveTagFromNote}
             note={currentNote}
             onUpdateNote={(title, content) => handleUpdateNote(currentNote.id, title, content)}
             onMoveToTrash={() => handleMoveToTrash(currentNote.id)}
@@ -158,7 +166,7 @@ export default function Home() {
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             tags={allTags}
             onAddTag={handleAddTag}
-            onDeleteTag={handleDeleteTag}
+            onDeleteTag={handleRemoveTagFromNote}
             note={currentNote}
             onUpdateNote={(title, content) => handleUpdateNote(currentNote.id, title, content)}
             onRestoreNote={() => handleRestoreFromTrash(currentNote.id)}
