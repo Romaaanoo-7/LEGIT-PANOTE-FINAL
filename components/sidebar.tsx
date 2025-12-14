@@ -242,6 +242,18 @@ export function Sidebar({
                             Settings
                         </Button>
                         <Separator className="my-2" />
+
+                        <Button
+                            variant={activeFilter.type === 'untagged' ? "secondary" : "ghost"}
+                            className="w-full justify-start text-muted-foreground hover:text-foreground"
+                            onClick={() => handleSetFilter('untagged')}
+                        >
+                            <div className="mr-2 flex h-4 w-4 items-center justify-center">
+                                <Tag className="h-3 w-3 opacity-50" />
+                            </div>
+                            Untagged Notes
+                        </Button>
+
                         <div className="flex items-center justify-between px-2 py-1">
                             <div className="text-xs font-medium text-muted-foreground">
                                 Tags
