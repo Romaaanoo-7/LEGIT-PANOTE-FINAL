@@ -158,11 +158,11 @@ export default function Home() {
   };
 
   // Note Handlers
-  const handleAddNote = async () => {
+  const handleAddNote = async (initialContent: string = '') => {
     try {
       const res = await fetch('/api/notes', {
         method: 'POST',
-        body: JSON.stringify({ title: 'New Note', content: '' })
+        body: JSON.stringify({ title: 'New Note', content: initialContent })
       });
       if (res.ok) {
         const n = await res.json();
@@ -206,9 +206,13 @@ export default function Home() {
 
   const handleUpdateNote = async (id: string, title: string, content: string, tag_id?: string | undefined) => {
     // Optimistic update (local state)
-    if (currentView === 'notes') {
+    // Update wherever found to ensure UI consistency regardless of current view
+    if (notes.some(n => n.id === id)) {
       setNotes(notes.map(note => note.id === id ? { ...note, title, content, tag_id } : note));
-    } else {
+    }
+
+    // Also check trash (though less likely to be edited from chat, good for consistency)
+    if (trashNotes.some(n => n.id === id)) {
       setTrashNotes(trashNotes.map(note => note.id === id ? { ...note, title, content, tag_id } : note));
     }
 
@@ -273,6 +277,30 @@ export default function Home() {
     }
   };
 
+  const handleAddToNoteFromChat = (text: string, noteId?: string) => {
+    if (noteId === 'new') {
+      handleAddNote(text);
+      setCurrentView('notes');
+      return;
+    }
+
+    const targetId = noteId || currentNoteId;
+
+    if (targetId) {
+      // Add to specific or current note
+      const note = notes.find(n => n.id === targetId);
+      if (note) {
+        const newContent = note.content ? note.content + "\n\n" + text : text;
+        handleUpdateNote(note.id, note.title, newContent, note.tag_id);
+        setCurrentNoteId(note.id);
+      }
+    } else {
+      // No target and no current note => Create new
+      handleAddNote(text);
+    }
+    setCurrentView('notes');
+  };
+
   // Determine what to display
   const displayNotes = currentView === 'trash' ? trashNotes : notes;
   const currentNote = displayNotes.find(n => n.id === currentNoteId);
@@ -288,13 +316,16 @@ export default function Home() {
           onDeleteTag={handleDeleteTag}
           notes={displayNotes}
           currentNoteId={currentNoteId || ''}
-          onSelectNote={setCurrentNoteId}
-          onAddNote={handleAddNote}
+          onSelectNote={(id) => {
+            setCurrentNoteId(id);
+            if (currentView !== 'trash') setCurrentView('notes');
+          }}
+          onAddNote={() => handleAddNote()}
           onPinNote={handlePinNote}
           isTrash={currentView === 'trash'}
         />
       )}
-      <main className="flex-1 overflow-hidden">
+      <main className={`flex-1 ${currentView === 'ai' ? 'overflow-hidden flex flex-col' : 'overflow-auto'}`}>
         {currentView === "notes" && (
           currentNote ? (
             <Editor
@@ -334,7 +365,7 @@ export default function Home() {
             </div>
           )
         )}
-        {currentView === "ai" && <AIChat />}
+        {currentView === "ai" && <AIChat onAddToNote={handleAddToNoteFromChat} notes={notes} />}
       </main>
       <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </div>
