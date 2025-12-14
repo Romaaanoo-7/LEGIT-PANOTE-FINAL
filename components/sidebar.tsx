@@ -106,66 +106,57 @@ export function Sidebar({
     // Check for "tag:" search syntax
     const isTagSearch = lowerQuery.startsWith("tag:");
     const tagSearchQuery = isTagSearch ? lowerQuery.slice(4).trim() : "";
-    const isExplicitTagSearch = isTagSearch && tagSearchQuery.length > 0;
 
-    // 1. Filter Tags
-    let matchedTags = tags;
-    if (isTagSearch) {
-        if (tagSearchQuery) {
-            matchedTags = tags.filter(tag => tag.name.toLowerCase().includes(tagSearchQuery));
-        } else {
-            matchedTags = tags;
+    // 1. Filter Tags (for visual list in search results)
+    // If tag: prefix used, we only show tags matching the suffix.
+    // If no prefix, we show tags matching the whole query.
+    const matchedTags = tags.filter(tag => {
+        if (isTagSearch) {
+            return tag.name.toLowerCase().includes(tagSearchQuery);
         }
-    } else {
-        matchedTags = tags.filter(tag => tag.name.toLowerCase().includes(lowerQuery));
-    }
+        return tag.name.toLowerCase().includes(lowerQuery);
+    });
 
-    // Check for "untagged" notes logic
+    // Check for "untagged" notes
     const hasUntaggedNotes = notes.some(n => (!n.tag_id) && !n.trashed);
-
-    // Allow "untagged" to appear for standard search OR "tag:untagged"
-    const showUntagged = (!isTagSearch && hasUntaggedNotes && "untagged".includes(lowerQuery)) ||
-        (isTagSearch && hasUntaggedNotes && "untagged".includes(tagSearchQuery));
+    // Show untagged option if it matches query or if specific tag:untagged (optional enhancement)
+    const showUntagged = hasUntaggedNotes && "untagged".includes(isTagSearch ? tagSearchQuery : lowerQuery);
 
     // Combine matched tags and potentially "untagged"
-    const displayTags = [...matchedTags];
-    // We handle untagged separately in the UI loop or add a dummy tag
+    const displayTags = matchedTags;
+
+    // 2. Filter Notes
     const filteredNotes = notes.filter(note => {
-        if (isTrash) {
-            // In trash mode, show trashed notes. 
-            // Note: external 'notes' prop should already contain the correct set (trash vs normal) based on parent logic, 
-            // but if we are filtering locally, we respect that.
-            // Actually, parent handles 'trash' view logic by passing 'trashNotes' as 'notes'. 
-            // But let's check trashed flag just in case.
-            // Relying on parent passing correct list.
-        }
+        if (note.trashed && !isTrash) return false;
 
         // 1. Filter by View
         if (activeFilter.type === 'untagged') {
             if (note.tag_id) return false;
         } else if (activeFilter.type === 'tag') {
-            // Find the tag name for the note's tag_id
             if (note.tag_id !== activeFilter.value) return false;
         }
 
         // 2. Filter by Search Query
-        if (searchQuery.trim()) {
-            const noteTagName = tags.find(t => t.id === note.tag_id)?.name || "";
+        if (hasSearch) {
+            const noteTagName = note.tag_id ? (tags.find(t => t.id === note.tag_id)?.name || "") : "";
+
             if (isTagSearch) {
-                // If just "tag:", show NO notes (focus on tags list)
-                if (!isExplicitTagSearch) return false;
+                // strict tag searching
+                if (!tagSearchQuery) return true;
 
-                // Filter notes by tag name (partial allowed for better UX)
+                // Let's filter by exact/partial match on tags
                 return noteTagName.toLowerCase().includes(tagSearchQuery);
+            } else {
+                // Normal search: title OR tag content
+                const titleMatch = note.title.toLowerCase().includes(lowerQuery);
+                const tagMatch = noteTagName.toLowerCase().includes(lowerQuery);
+                return titleMatch || tagMatch;
             }
-
-            const titleMatch = note.title.toLowerCase().includes(lowerQuery);
-            const tagMatch = noteTagName.toLowerCase().includes(lowerQuery);
-            return titleMatch || tagMatch;
         }
 
         return true;
     });
+
 
     // Sort notes
     const notesDisplay = (hasSearch || activeFilter.type !== 'all') ? filteredNotes : notes;
@@ -327,7 +318,7 @@ export function Sidebar({
                         // SEARCH RESULTS VIEW
                         <div className="space-y-1 p-2">
                             {/* Search by Tag Section */}
-                            {displayTags.length > 0 && (
+                            {(displayTags.length > 0 || showUntagged) && (
                                 <div className="mb-4">
                                     <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase">
                                         Search by Tag
