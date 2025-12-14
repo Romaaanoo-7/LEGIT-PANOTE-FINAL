@@ -21,9 +21,31 @@ export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
 
-  // Note State - Empty initial state
-  const [notes, setNotes] = React.useState<Note[]>([]);
-  const [currentNoteId, setCurrentNoteId] = React.useState<string>('');
+  // Note State - Initial Welcome Note
+  const [notes, setNotes] = React.useState<Note[]>([
+    {
+      id: 'welcome-note',
+      title: 'Welcome to Pa-Note',
+      content: `Pa-Note is an easy way to take notes, capture ideas, and more. Open it, jot down some thoughts, and you're done. 
+
+Pinned Notes
+
+Have a few important notes that you keep coming back to? Pin those notes to the top of your list for easier access.
+
+Tags
+
+Keep your notes organized by adding tags. Tags work a bit like folders, except there’s no limit to the number of tags you can add per note.
+
+Search
+
+Quickly find notes using search.`,
+      date: new Date().toLocaleDateString(),
+      pinned: true,
+      trashed: false,
+      tags: []
+    }
+  ]);
+  const [currentNoteId, setCurrentNoteId] = React.useState<string>('welcome-note');
 
   const handleNavigate = (view: "notes" | "ai" | "trash" | "settings") => {
     if (view === "settings") {
