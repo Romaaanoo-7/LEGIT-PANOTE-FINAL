@@ -25,6 +25,7 @@ export default function Home() {
   const [currentView, setCurrentView] = React.useState<"notes" | "ai" | "trash" | "settings">("notes");
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const [availableTags, setAvailableTags] = React.useState<string[]>([]);
 
   const [tags, setTags] = React.useState<Tag[]>([]);
   const [notes, setNotes] = React.useState<Note[]>([]);
@@ -72,7 +73,6 @@ export default function Home() {
           tag_id: n.tag_id
         })));
       }
-
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -84,6 +84,16 @@ export default function Home() {
     fetchData();
   }, [fetchData]);
 
+  // Initialize availableTags from existing notes
+  React.useEffect(() => {
+    // This effect should probably be removed or refactored if tags are managed via `tags` state
+    // For now, keeping it as is but noting it might be redundant with `tags` state
+    const initialTags = Array.from(new Set(notes.flatMap(note => note.tag_id ? [note.tag_id] : [])));
+    if (availableTags.length === 0 && initialTags.length > 0) {
+      setAvailableTags(initialTags);
+    }
+  }, [notes, availableTags]); // Run when notes change
+
   const handleNavigate = (view: "notes" | "ai" | "trash" | "settings") => {
     if (view === "settings") {
       setIsSettingsOpen(true);
@@ -94,8 +104,21 @@ export default function Home() {
     }
   };
 
+  // Tag Handlers
+  // Tag Handlers
   const handleAddTag = async (name: string) => {
     if (!name.trim()) return;
+
+    // Check if tag exists
+    const existingTag = tags.find(t => t.name.toLowerCase() === name.trim().toLowerCase());
+    if (existingTag) {
+      // Just assign it to current note
+      if (currentNoteId) {
+        handleUpdateNote(currentNoteId, currentNote?.title || "", currentNote?.content || "", existingTag.id);
+      }
+      return;
+    }
+
     try {
       const res = await fetch('/api/tags', {
         method: 'POST',
@@ -104,18 +127,33 @@ export default function Home() {
       if (res.ok) {
         const newTag = await res.json();
         setTags([...tags, newTag]);
+        // Assign to current note
+        if (currentNoteId) {
+          handleUpdateNote(currentNoteId, currentNote?.title || "", currentNote?.content || "", newTag.id);
+        }
       }
     } catch (e) {
       console.error(e);
     }
   };
 
+  const handleDeleteTagFromNote = (tagId: string) => {
+    if (currentNoteId) {
+      handleUpdateNote(currentNoteId, currentNote?.title || "", currentNote?.content || "", undefined);
+    }
+  };
+
   const handleDeleteTag = async (id: string) => {
+    // Optimistic update
+    setTags(tags.filter((tag) => tag.id !== id));
+    setNotes(notes.map(n => n.tag_id === id ? { ...n, tag_id: undefined } : n));
+    setTrashNotes(trashNotes.map(n => n.tag_id === id ? { ...n, tag_id: undefined } : n));
+
     try {
       await fetch(`/api/tags/${id}`, { method: 'DELETE' });
-      setTags(tags.filter((tag) => tag.id !== id));
     } catch (e) {
       console.error(e);
+      fetchData(); // Revert on error
     }
   };
 
@@ -166,7 +204,7 @@ export default function Home() {
     }
   };
 
-  const handleUpdateNote = async (id: string, title: string, content: string, tag_id?: string) => {
+  const handleUpdateNote = async (id: string, title: string, content: string, tag_id?: string | undefined) => {
     // Optimistic update (local state)
     if (currentView === 'notes') {
       setNotes(notes.map(note => note.id === id ? { ...note, title, content, tag_id } : note));
@@ -262,9 +300,9 @@ export default function Home() {
             <Editor
               isSidebarOpen={isSidebarOpen}
               onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-              tags={tags}
+              tags={currentNote.tag_id ? tags.filter(t => t.id === currentNote.tag_id) : []}
               onAddTag={handleAddTag}
-              onDeleteTag={handleDeleteTag}
+              onDeleteTag={handleDeleteTagFromNote}
               note={currentNote}
               onUpdateNote={(title, content, tag_id) => handleUpdateNote(currentNote.id, title, content, tag_id)}
               onMoveToTrash={() => handleMoveToTrash(currentNote.id)}
@@ -281,9 +319,9 @@ export default function Home() {
             <Editor
               isSidebarOpen={isSidebarOpen}
               onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-              tags={tags}
+              tags={currentNote.tag_id ? tags.filter(t => t.id === currentNote.tag_id) : []}
               onAddTag={handleAddTag}
-              onDeleteTag={handleDeleteTag}
+              onDeleteTag={handleDeleteTagFromNote}
               note={currentNote}
               onUpdateNote={(title, content, tag_id) => handleUpdateNote(currentNote.id, title, content, tag_id)}
               onRestoreNote={() => handleRestoreFromTrash(currentNote.id)}

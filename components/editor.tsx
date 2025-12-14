@@ -6,7 +6,7 @@ import {
     Paperclip,
     Info,
     MoreHorizontal,
-    Tag,
+    Tag as TagIcon,
     X,
     ListTodo,
 } from "lucide-react";
@@ -257,7 +257,7 @@ export function Editor({
                         )}
                         onClick={() => !isTrash && onUpdateNote(note.title, note.content, note.tag_id === tag.id ? undefined : tag.id)}
                     >
-                        <Tag className="h-3 w-3" />
+                        <TagIcon className="h-3 w-3" />
                         <span>{tag.name}</span>
                         {!isTrash && (
                             <button

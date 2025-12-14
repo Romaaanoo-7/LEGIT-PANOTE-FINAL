@@ -16,6 +16,13 @@ export async function DELETE(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Unset this tag from any notes that use it (simulating CASCADE SET NULL)
+    await supabase
+        .from('notes')
+        .update({ tag_id: null })
+        .eq('tag_id', id)
+        .eq('user_id', user.id)
+
     const { error } = await supabase
         .from('tags')
         .delete()
