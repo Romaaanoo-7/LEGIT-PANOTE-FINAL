@@ -13,20 +13,17 @@ interface Note {
   date: string;
   pinned: boolean;
   trashed?: boolean;
+  tags: string[];
 }
 
 export default function Home() {
   const [currentView, setCurrentView] = React.useState<"notes" | "ai" | "trash" | "settings">("notes");
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
-  const [tags, setTags] = React.useState<string[]>(["Tag"]);
 
-  // Note State
-  const [notes, setNotes] = React.useState<Note[]>([
-    { id: '1', title: 'Title', content: 'This is your text.', date: new Date().toLocaleDateString(), pinned: false, trashed: false },
-    { id: '2', title: 'Class Notes', content: 'ABCD.', date: new Date().toLocaleDateString(), pinned: false, trashed: false }
-  ]);
-  const [currentNoteId, setCurrentNoteId] = React.useState<string>('1');
+  // Note State - Empty initial state
+  const [notes, setNotes] = React.useState<Note[]>([]);
+  const [currentNoteId, setCurrentNoteId] = React.useState<string>('');
 
   const handleNavigate = (view: "notes" | "ai" | "trash" | "settings") => {
     if (view === "settings") {
@@ -36,15 +33,34 @@ export default function Home() {
     }
   };
 
+  // Tag Handlers - now operating on the current note
   const handleAddTag = (tag: string) => {
-    if (tag.trim() && !tags.includes(tag.trim())) {
-      setTags([...tags, tag.trim()]);
-    }
+    const trimmedTag = tag.trim();
+    if (!trimmedTag || !currentNoteId) return;
+
+    setNotes(notes.map(note => {
+      if (note.id === currentNoteId) {
+        if (!note.tags.includes(trimmedTag)) {
+          return { ...note, tags: [...note.tags, trimmedTag] };
+        }
+      }
+      return note;
+    }));
   };
 
   const handleDeleteTag = (tagToDelete: string) => {
-    setTags(tags.filter((tag) => tag !== tagToDelete));
+    if (!currentNoteId) return;
+
+    setNotes(notes.map(note => {
+      if (note.id === currentNoteId) {
+        return { ...note, tags: note.tags.filter(t => t !== tagToDelete) };
+      }
+      return note;
+    }));
   };
+
+  // Derive all unique tags from all notes for the sidebar
+  const allTags = Array.from(new Set(notes.flatMap(note => note.tags || [])));
 
   // Note Handlers
   const handleAddNote = () => {
@@ -54,7 +70,8 @@ export default function Home() {
       content: '',
       date: new Date().toLocaleDateString(),
       pinned: false,
-      trashed: false
+      trashed: false,
+      tags: []
     };
     setNotes([newNote, ...notes]);
     setCurrentNoteId(newNote.id);
@@ -74,10 +91,6 @@ export default function Home() {
 
   const handleMoveToTrash = (id: string) => {
     setNotes(notes.map(note => note.id === id ? { ...note, trashed: true } : note));
-    // If the current note is trashed, switch to another note or clear selection if needed
-    // For now, we'll just let the user stay on the editor or maybe switch view?
-    // The requirement says "it will only show at the Trash page".
-    // So if we are in "notes" view, it should disappear from sidebar.
   };
 
   const handleRestoreFromTrash = (id: string) => {
@@ -86,6 +99,9 @@ export default function Home() {
 
   const handleDeleteForever = (id: string) => {
     setNotes(notes.filter(note => note.id !== id));
+    if (currentNoteId === id) {
+      setCurrentNoteId('');
+    }
   };
 
   // Filter notes based on current view
@@ -96,7 +112,14 @@ export default function Home() {
     return !note.trashed;
   });
 
-  const currentNote = notes.find(n => n.id === currentNoteId) || visibleNotes[0];
+  const currentNote = notes.find(n => n.id === currentNoteId) || (visibleNotes.length > 0 ? visibleNotes[0] : undefined);
+
+  // Update currentNoteId if it's invalid or empty but we have notes
+  React.useEffect(() => {
+    if (!currentNoteId && visibleNotes.length > 0) {
+      setCurrentNoteId(visibleNotes[0].id);
+    }
+  }, [currentNoteId, visibleNotes]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
@@ -105,8 +128,8 @@ export default function Home() {
           currentView={currentView}
           onNavigate={handleNavigate}
           className="hidden md:flex"
-          tags={tags}
-          onDeleteTag={handleDeleteTag}
+          tags={allTags}
+          onDeleteTag={() => { }}
           notes={visibleNotes}
           currentNoteId={currentNoteId}
           onSelectNote={setCurrentNoteId}
@@ -120,7 +143,7 @@ export default function Home() {
           <Editor
             isSidebarOpen={isSidebarOpen}
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-            tags={tags}
+            tags={allTags}
             onAddTag={handleAddTag}
             onDeleteTag={handleDeleteTag}
             note={currentNote}
@@ -133,7 +156,7 @@ export default function Home() {
           <Editor
             isSidebarOpen={isSidebarOpen}
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-            tags={tags}
+            tags={allTags}
             onAddTag={handleAddTag}
             onDeleteTag={handleDeleteTag}
             note={currentNote}

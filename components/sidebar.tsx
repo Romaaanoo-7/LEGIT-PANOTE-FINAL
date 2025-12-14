@@ -28,6 +28,8 @@ interface Note {
     content: string;
     date: string;
     pinned: boolean;
+    trashed?: boolean;
+    tags?: string[];
 }
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -58,6 +60,7 @@ export function Sidebar({
 }: SidebarProps) {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
     const [isEditingTags, setIsEditingTags] = React.useState(false);
+    const [searchQuery, setSearchQuery] = React.useState("");
     const { user } = useAuth();
 
     // Get display name: metadata.full_name -> email -> "User"
@@ -71,9 +74,42 @@ export function Sidebar({
         .toUpperCase()
         .slice(0, 2);
 
-    // Sort notes: pinned first, then by date (newest first)
-    const sortedNotes = [...notes].sort((a, b) => {
-        if (a.pinned === b.pinned) return 0; // Maintain order for same pinned status (or sort by date)
+    // Filter Logic
+    const hasSearch = searchQuery.trim().length > 0;
+    const lowerQuery = searchQuery.toLowerCase();
+
+    // 1. Filter Tags
+    const matchedTags = tags.filter(tag => tag.toLowerCase().includes(lowerQuery));
+
+    // Check for "untagged" notes
+    const hasUntaggedNotes = notes.some(n => (!n.tags || n.tags.length === 0) && !n.trashed);
+    const showUntagged = hasUntaggedNotes && "untagged".includes(lowerQuery);
+
+    // Combine matched tags and potentially "untagged"
+    const displayTags = [...matchedTags];
+    if (showUntagged) {
+        displayTags.push("untagged");
+    }
+
+    // 2. Filter Notes
+    const filteredNotes = notes.filter(note => {
+        if (note.trashed && !isTrash) return false;
+
+        const titleMatch = note.title.toLowerCase().includes(lowerQuery);
+        // Note tag match
+        const tagMatch = (note.tags || []).some(tag => tag.toLowerCase().includes(lowerQuery));
+        // Untagged match
+        const isUntagged = (!note.tags || note.tags.length === 0);
+        const untaggedMatch = isUntagged && "untagged".includes(lowerQuery);
+
+        return titleMatch || tagMatch || untaggedMatch;
+    });
+
+    // Sort notes
+    const notesDisplay = hasSearch ? filteredNotes : notes;
+
+    const sortedNotes = [...notesDisplay].sort((a, b) => {
+        if (a.pinned === b.pinned) return 0;
         return a.pinned ? -1 : 1;
     });
 
@@ -203,50 +239,133 @@ export function Sidebar({
             <div className="p-4">
                 <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search all notes and tags" className="pl-8" />
+                    <Input
+                        placeholder="Search notes and tags"
+                        className="pl-8"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                 </div>
             </div>
 
-            {/* Note List */}
+            {/* Note List / Search Results */}
             <ScrollArea className="flex-1">
                 {currentView === "trash" && notes.length === 0 ? (
                     <div className="flex h-full items-center justify-center p-4 text-center text-sm text-muted-foreground">
                         Trash is empty.
                     </div>
                 ) : (
-                    <div className="space-y-1 p-2">
-                        {sortedNotes.map((note) => (
-                            <div
-                                key={note.id}
-                                className={cn(
-                                    "group flex flex-col gap-1 rounded-lg p-3 transition-colors hover:bg-sidebar-accent/50 cursor-pointer",
-                                    currentNoteId === note.id ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground"
-                                )}
-                                onClick={() => onSelectNote(note.id)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <span className="font-medium line-clamp-1">{note.title || "Title"}</span>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className={cn(
-                                            "h-6 w-6 hover:bg-transparent",
-                                            note.pinned ? "text-primary opacity-100" : "opacity-0 group-hover:opacity-50"
-                                        )}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onPinNote(note.id);
-                                        }}
-                                    >
-                                        <Pin className={cn("h-3 w-3", note.pinned && "fill-current")} />
-                                    </Button>
+                    hasSearch ? (
+                        // SEARCH RESULTS VIEW
+                        <div className="space-y-1 p-2">
+                            {/* Search by Tag Section */}
+                            {displayTags.length > 0 && (
+                                <div className="mb-4">
+                                    <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase">
+                                        Search by Tag
+                                    </div>
+                                    {displayTags.map(tag => (
+                                        <div
+                                            key={tag}
+                                            className="flex items-center px-2 py-1.5 text-sm text-sidebar-foreground cursor-pointer hover:bg-sidebar-accent/50 rounded-md"
+                                            onClick={() => setSearchQuery(tag)}
+                                        >
+                                            tag: {tag}
+                                        </div>
+                                    ))}
                                 </div>
-                                <span className="text-xs text-muted-foreground line-clamp-1">
-                                    {note.content || "No content"}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+                            )}
+
+                            {/* Divider if both exist */}
+                            {displayTags.length > 0 && sortedNotes.length > 0 && (
+                                <Separator className="my-2" />
+                            )}
+
+                            {/* Notes Section */}
+                            {sortedNotes.length > 0 && (
+                                <div className="space-y-1">
+                                    {displayTags.length > 0 && (
+                                        <div className="mb-2 px-2 text-xs font-semibold text-muted-foreground uppercase">
+                                            Notes
+                                        </div>
+                                    )}
+                                    {sortedNotes.map((note) => (
+                                        <div
+                                            key={note.id}
+                                            className={cn(
+                                                "group flex flex-col gap-1 rounded-lg p-3 transition-colors hover:bg-sidebar-accent/50 cursor-pointer",
+                                                currentNoteId === note.id ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground"
+                                            )}
+                                            onClick={() => onSelectNote(note.id)}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-medium line-clamp-1">{note.title || "Title"}</span>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className={cn(
+                                                        "h-6 w-6 hover:bg-transparent",
+                                                        note.pinned ? "text-primary opacity-100" : "opacity-0 group-hover:opacity-50"
+                                                    )}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onPinNote(note.id);
+                                                    }}
+                                                >
+                                                    <Pin className={cn("h-3 w-3", note.pinned && "fill-current")} />
+                                                </Button>
+                                            </div>
+                                            <span className="text-xs text-muted-foreground line-clamp-1">
+                                                {note.content || "No content"}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* No Results */}
+                            {displayTags.length === 0 && sortedNotes.length === 0 && (
+                                <div className="flex items-center justify-center p-4 text-sm text-muted-foreground">
+                                    No results
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        // DEFAULT VIEW (No Search)
+                        <div className="space-y-1 p-2">
+                            {sortedNotes.map((note) => (
+                                <div
+                                    key={note.id}
+                                    className={cn(
+                                        "group flex flex-col gap-1 rounded-lg p-3 transition-colors hover:bg-sidebar-accent/50 cursor-pointer",
+                                        currentNoteId === note.id ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground"
+                                    )}
+                                    onClick={() => onSelectNote(note.id)}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-medium line-clamp-1">{note.title || "Title"}</span>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className={cn(
+                                                "h-6 w-6 hover:bg-transparent",
+                                                note.pinned ? "text-primary opacity-100" : "opacity-0 group-hover:opacity-50"
+                                            )}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onPinNote(note.id);
+                                            }}
+                                        >
+                                            <Pin className={cn("h-3 w-3", note.pinned && "fill-current")} />
+                                        </Button>
+                                    </div>
+                                    <span className="text-xs text-muted-foreground line-clamp-1">
+                                        {note.content || "No content"}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )
                 )}
             </ScrollArea>
         </div>
