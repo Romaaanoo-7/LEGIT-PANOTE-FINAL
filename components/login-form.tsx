@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 import {
   Card,
   CardContent,
@@ -44,8 +45,11 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="border-2 border-primary">
-        <CardHeader>
+      <div className="flex justify-center transition-all duration-500">
+        <Image src="/favicon.ico" alt="Logo" width={164} height={164} className="dark:invert transition-all duration-500" />
+      </div>
+      <Card className="border-2 border-primary transition-all duration-500">
+        <CardHeader className="text-center">
           <CardTitle>Login to your account</CardTitle>
           <CardDescription>
             Enter your email below to login to your account
@@ -61,7 +65,7 @@ export function LoginForm({
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="m@example.com"
+
                   required
                 />
               </Field>
