@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -22,11 +22,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 
-interface Tag {
-    id: string;
-    name: string;
-}
-
 interface Note {
     id: string;
     title: string;
@@ -34,6 +29,11 @@ interface Note {
     date: string;
     pinned: boolean;
     tag_id?: string;
+}
+
+interface Tag {
+    id: string;
+    name: string;
 }
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
