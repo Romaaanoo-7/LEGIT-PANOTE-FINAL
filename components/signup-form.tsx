@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input"
 import { signup } from "@/app/auth/actions"
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
   const [isLoading, setIsLoading] = useState(false)
@@ -46,7 +47,11 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
       setError(result.error)
       setIsLoading(false)
     } else {
-      // Redirect handled by server action
+      toast.success("Need to verify your account to your given Email address to Login!")
+      // Redirect to login page after a short delay to allow toast to be seen
+      setTimeout(() => {
+        window.location.href = '/login' // or router.push('/login')
+      }, 2000)
     }
   }
 

@@ -51,7 +51,8 @@ export async function signup(formData: FormData) {
     // Check if email confirmation is required?
     // Usually redirect to a "check your email" page or dashboard if auto-confirm is on
     revalidatePath('/', 'layout')
-    redirect('/')
+    // redirect('/') - Removed to allow client-side toast
+    return { success: true }
 }
 
 export async function forgotPassword(formData: FormData) {

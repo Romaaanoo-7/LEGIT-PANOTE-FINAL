@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/auth-context";
 // 1. Import the ThemeProvider you created
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { ModeToggle } from "@/components/ui/modetoggle";
+import { Toaster } from "sonner";
 
 const adventPro = Advent_Pro({
   variable: "--font-advent-pro",
@@ -40,6 +41,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>{children}</AuthProvider>
+          <Toaster position="top-center" />
           <div className="fixed bottom-4 right-4 z-50">
             <ModeToggle />
           </div>
