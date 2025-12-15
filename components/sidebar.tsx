@@ -192,6 +192,12 @@ export function Sidebar({
         return a.pinned ? -1 : 1;
     });
 
+    // Helper to strip HTML tags for preview
+    const stripHtml = (html: string) => {
+        if (!html) return "";
+        return html.replace(/<[^>]*>?/gm, '');
+    };
+
     return (
         <div
             className={cn(
@@ -426,7 +432,7 @@ export function Sidebar({
                                             </Button>
                                         </div>
                                         <span className="text-xs text-muted-foreground line-clamp-1">
-                                            {note.content || "No content"}
+                                            {stripHtml(note.content) || "No content"}
                                         </span>
                                     </div>
                                 ))
@@ -463,7 +469,7 @@ export function Sidebar({
                                         </Button>
                                     </div>
                                     <span className="text-xs text-muted-foreground line-clamp-1">
-                                        {note.content || "No content"}
+                                        {stripHtml(note.content) || "No content"}
                                     </span>
                                 </div>
                             ))}

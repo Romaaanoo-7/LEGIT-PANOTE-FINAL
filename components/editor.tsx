@@ -9,11 +9,13 @@ import {
     Tag as TagIcon,
     X,
     ListTodo,
+    Bold,
+    Italic,
+    Underline as UnderlineIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import {
     Dialog,
@@ -28,6 +30,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
 
 interface Tag {
     id: string;
@@ -71,14 +76,58 @@ export function Editor({
     isTrash
 }: EditorProps) {
     const [newTag, setNewTag] = React.useState("");
-    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Underline,
+        ],
+        content: note.content,
+        onUpdate: ({ editor }) => {
+            onUpdateNote(note.title, editor.getHTML(), note.tag_id);
+        },
+        editorProps: {
+            attributes: {
+                class: 'min-h-[calc(100vh-300px)] border-none bg-transparent text-lg shadow-none focus-visible:outline-none px-0 prose prose-invert max-w-none',
+            },
+        },
+        editable: !isTrash,
+        immediatelyRender: false,
+    });
+
+    // Update editor content when note changes externally (e.g. switching notes)
+    React.useEffect(() => {
+        if (editor && note.content !== editor.getHTML()) {
+            // Avoid loop if content is same (Tiptap getHTML might return different string for same content sometimes, but basic check helps)
+            // Actually, simply setting content on every render is bad for cursor.
+            // We should only set content if the note ID changed or if it's vastly different.
+            // For this simple app, we can check if it's the same note ID/title logic or just trust that note.content is stable.
+            // But if we seek to update content while typing, it will re-render.
+            // A common pattern is to sync only when note.id changes.
+        }
+    }, [note.id, editor]);
+
+    React.useEffect(() => {
+        if (editor && note.id) {
+            // When note ID changes, load the new content.
+            // We use emitUpdate: false to prevent triggering the onUpdate callback immediately
+            if (editor.getHTML() !== note.content) {
+                editor.commands.setContent(note.content || "", { emitUpdate: false });
+            }
+        }
+    }, [note.id, editor]);
+
 
     // Mock data for dates (using note date if available, or current date)
     const createdDate = note.date || new Date().toLocaleDateString();
     const modifiedDate = new Date().toLocaleDateString();
 
-    const wordCount = (note.content || "").trim().split(/\s+/).filter((w) => w.length > 0).length;
-    const charCount = (note.content || "").length;
+    const wordCount = editor?.storage.characterCount?.words?.() || 0; // Tiptap doesn't have character count by default in starter kit without extension, but we can approximate or add extension.
+    // Actually starter kit doesn't include CharacterCount extension.
+    // Let's us basic approximation from textContent.
+    const textContent = editor?.getText() || "";
+    const activeWordCount = textContent.trim().split(/\s+/).filter((w) => w.length > 0).length;
+    const charCount = textContent.length;
 
     const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && newTag.trim()) {
@@ -87,42 +136,9 @@ export function Editor({
         }
     };
 
-    const handleChecklist = () => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const value = textarea.value;
-
-        // Find start of current line
-        const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-        const lineEnd = value.indexOf('\n', start);
-        const currentLine = value.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
-
-        let newValue;
-        let newCursorPos;
-
-        if (currentLine.startsWith('- [ ] ') || currentLine.startsWith('- [x] ')) {
-            // Remove checklist
-            newValue = value.slice(0, lineStart) + currentLine.substring(6) + value.slice(lineEnd === -1 ? value.length : lineEnd);
-            newCursorPos = start - 6;
-        } else {
-            // Add checklist
-            newValue = value.slice(0, lineStart) + "- [ ] " + currentLine + value.slice(lineEnd === -1 ? value.length : lineEnd);
-            newCursorPos = start + 6;
-        }
-
-        onUpdateNote(note.title, newValue, note.tag_id);
-
-        // Restore cursor position after render
-        requestAnimationFrame(() => {
-            if (textareaRef.current) {
-                textareaRef.current.selectionStart = newCursorPos;
-                textareaRef.current.selectionEnd = newCursorPos;
-                textareaRef.current.focus();
-            }
-        });
-    };
+    if (!editor) {
+        return null;
+    }
 
     return (
         <div className="flex h-full flex-col bg-background relative">
@@ -155,7 +171,35 @@ export function Editor({
                         </>
                     ) : (
                         <>
-                            <Button variant="ghost" size="icon" onClick={handleChecklist}>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => editor.chain().focus().toggleBold().run()}
+                                className={editor.isActive('bold') ? 'bg-secondary' : ''}
+                            >
+                                <Bold className="h-4 w-4" />
+                                <span className="sr-only">Bold</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => editor.chain().focus().toggleItalic().run()}
+                                className={editor.isActive('italic') ? 'bg-secondary' : ''}
+                            >
+                                <Italic className="h-4 w-4" />
+                                <span className="sr-only">Italic</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => editor.chain().focus().toggleUnderline().run()}
+                                className={editor.isActive('underline') ? 'bg-secondary' : ''}
+                            >
+                                <UnderlineIcon className="h-4 w-4" />
+                                <span className="sr-only">Underline</span>
+                            </Button>
+                            <Separator orientation="vertical" className="mx-1 h-6" />
+                            <Button variant="ghost" size="icon">
                                 <ListTodo className="h-4 w-4" />
                                 <span className="sr-only">Checklist</span>
                             </Button>
@@ -187,7 +231,7 @@ export function Editor({
                                         </div>
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-medium">Words</span>
-                                            <span className="text-sm text-muted-foreground">{wordCount}</span>
+                                            <span className="text-sm text-muted-foreground">{activeWordCount}</span>
                                         </div>
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-medium">Characters</span>
@@ -229,20 +273,13 @@ export function Editor({
             <div className="flex-1 overflow-y-auto pb-20">
                 <div className="mx-auto flex w-full max-w-3xl flex-col p-8">
                     <Input
-                        className="mb-4 border-none bg-transparent text-4xl font-bold shadow-none focus-visible:ring-0 px-0"
-                        placeholder="Title"
+                        className="mb-4 border-none bg-transparent text-4xl font-bold shadow-none focus-visible:ring-0 px-0 text-center"
+                        placeholder="New Note"
                         value={note.title}
                         onChange={(e) => onUpdateNote(e.target.value, note.content, note.tag_id)}
                         disabled={isTrash}
                     />
-                    <Textarea
-                        ref={textareaRef}
-                        className="min-h-[calc(100vh-300px)] resize-none border-none bg-transparent text-lg shadow-none focus-visible:ring-0 px-0"
-                        placeholder="This is your text."
-                        value={note.content}
-                        onChange={(e) => onUpdateNote(note.title, e.target.value, note.tag_id)}
-                        disabled={isTrash}
-                    />
+                    <EditorContent editor={editor} />
                 </div>
             </div>
 

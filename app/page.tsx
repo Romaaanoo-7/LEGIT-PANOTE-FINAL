@@ -295,8 +295,16 @@ export default function Home() {
   };
 
   const handleAddToNoteFromChat = (text: string, noteId?: string) => {
+    // Helper to format text into HTML paragraphs
+    const formatToHtml = (plainText: string) => {
+      if (!plainText) return "";
+      return plainText.split('\n').map(line => `<p>${line || '<br>'}</p>`).join('');
+    };
+
+    const formattedText = formatToHtml(text);
+
     if (noteId === 'new') {
-      handleAddNote(text);
+      handleAddNote(formattedText);
       setCurrentView('notes');
       return;
     }
@@ -307,13 +315,15 @@ export default function Home() {
       // Add to specific or current note
       const note = notes.find(n => n.id === targetId);
       if (note) {
-        const newContent = note.content ? note.content + "\n\n" + text : text;
+        // Append new content. If existing content doesn't end with a tag, maybe add spacing? 
+        // For HTML content, just appending the new paragraphs is usually sufficient.
+        const newContent = note.content ? note.content + formattedText : formattedText;
         handleUpdateNote(note.id, note.title, newContent, note.tag_id);
         setCurrentNoteId(note.id);
       }
     } else {
       // No target and no current note => Create new
-      handleAddNote(text);
+      handleAddNote(formattedText);
     }
     setCurrentView('notes');
   };
