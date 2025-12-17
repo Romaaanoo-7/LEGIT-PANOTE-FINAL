@@ -60,6 +60,7 @@ export async function PATCH(
 
     try {
         const json = await request.json()
+
         // Allow updating title, content, tag_id, is_deleted (for restore), and is_pinned
         const { title, content, tag_id, is_deleted, is_pinned } = json
 

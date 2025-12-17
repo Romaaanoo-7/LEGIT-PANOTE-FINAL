@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { toast } from "sonner";
 import Underline from '@tiptap/extension-underline';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
@@ -136,13 +137,17 @@ export function Editor({
 
     React.useEffect(() => {
         if (editor && note.id) {
-            // When note ID changes, load the new content.
+            console.log(`Editor received note ${note.id} update. Content len: ${note.content?.length || 0}`);
+            // Wen the note ID changes, load the new content.
             // We use emitUpdate: false to prevent triggering the onUpdate callback immediately
             if (editor.getHTML() !== note.content) {
+                console.log("Updating editor content from props");
                 editor.commands.setContent(note.content || "", { emitUpdate: false });
+            } else {
+                console.log("Editor content matches props, skipping update");
             }
         }
-    }, [note.id, editor]);
+    }, [note.id, note.content, editor]); // Added note.content to deps to ensure updates from fetch reach editor
 
 
     // Mock data for dates (using note date if available, or current date)
@@ -163,17 +168,54 @@ export function Editor({
         }
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const result = e.target?.result as string;
-                if (result && editor) {
-                    editor.chain().focus().setImage({ src: result }).run();
+            // Optimistic UI: Show image immediately
+            const previewUrl = URL.createObjectURL(file);
+            if (editor) {
+                editor.chain().focus().setImage({ src: previewUrl }).run();
+            }
+
+            const toastId = toast.loading("Uploading image...");
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    const errorDate = await res.json();
+                    throw new Error(errorDate.error || "Upload failed");
                 }
-            };
-            reader.readAsDataURL(file);
+
+                const { publicUrl } = await res.json();
+
+                // Swap the blob URL with the real Public URL
+                if (editor && publicUrl) {
+                    editor.state.doc.descendants((node, pos) => {
+                        if (node.type.name === 'image' && node.attrs.src === previewUrl) {
+                            const transaction = editor.state.tr.setNodeMarkup(pos, undefined, {
+                                ...node.attrs,
+                                src: publicUrl
+                            });
+                            editor.view.dispatch(transaction);
+                            return false; // Stop iteration
+                        }
+                        return true;
+                    });
+                    toast.success("Image uploaded", { id: toastId });
+                }
+            } catch (error: any) {
+                console.error("Error uploading image:", error);
+                toast.error(`Error uploading image: ${error.message}`, { id: toastId });
+                // Optional: Remove the image if upload failed? 
+                // For now, let user decide to delete it.
+            }
         }
         // Reset input
         if (fileInputRef.current) {

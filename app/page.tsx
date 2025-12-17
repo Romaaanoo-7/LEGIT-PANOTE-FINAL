@@ -41,16 +41,17 @@ export default function Home() {
   const [chatMessages, setChatMessages] = React.useState<ChatMessage[]>([]);
   const [currentNoteId, setCurrentNoteId] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isSaving, setIsSaving] = React.useState(false);
 
   // Fetch Data
   const fetchData = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const [notesRes, tagsRes, trashRes, chatRes] = await Promise.all([
-        fetch('/api/notes'),
-        fetch('/api/tags'),
-        fetch('/api/trash'),
-        fetch('/api/chat')
+        fetch(`/api/notes?t=${Date.now()}`, { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } }),
+        fetch('/api/tags', { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } }),
+        fetch('/api/trash', { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } }),
+        fetch('/api/chat', { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } })
       ]);
 
       let fetchedNotes: Note[] = [];
@@ -307,13 +308,22 @@ export default function Home() {
     }
 
     // Debounce this in a real app, but for now direct call
+    setIsSaving(true);
     try {
-      await fetch(`/api/notes/${id}`, {
+      const res = await fetch(`/api/notes/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ title, content, tag_id })
       });
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Failed to save note: ${res.status} ${res.statusText} - ${errorText}`);
+      }
     } catch (e) {
       console.error(e);
+      // Alert the user so they know it failed
+      alert(`Error saving note: ${e}`);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -423,6 +433,7 @@ export default function Home() {
           onAddNote={() => handleAddNote()}
           onPinNote={handlePinNote}
           isTrash={currentView === 'trash'}
+          isSaving={isSaving}
         />
       )}
       <main className={`flex-1 ${currentView === 'ai' ? 'overflow-hidden flex flex-col' : 'overflow-auto'}`}>

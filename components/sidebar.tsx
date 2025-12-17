@@ -56,6 +56,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
     onAddNote: () => void;
     onPinNote: (id: string) => void;
     isTrash?: boolean;
+    isSaving?: boolean;
 }
 
 export function Sidebar({
@@ -69,7 +70,8 @@ export function Sidebar({
     onSelectNote,
     onAddNote,
     onPinNote,
-    isTrash
+    isTrash,
+    isSaving
 }: SidebarProps) {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
     const [isEditingTags, setIsEditingTags] = React.useState(false);
@@ -225,7 +227,10 @@ export function Sidebar({
                                 <AvatarImage src="/placeholder-user.jpg" />
                                 <AvatarFallback>{initials || "UN"}</AvatarFallback>
                             </Avatar>
-                            <span className="text-sm font-medium">{displayName}'s Notepad</span>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-medium">{displayName}'s Notepad</span>
+                                {isSaving && <span className="text-xs text-muted-foreground animate-pulse">Saving...</span>}
+                            </div>
                         </>
                     )}
                 </div>
