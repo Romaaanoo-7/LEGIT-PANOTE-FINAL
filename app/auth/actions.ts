@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 // import { createClient } from '@/utils/supabase/server'
 // We will use the server client we created
-import { createClient } from '@/utils/supabase/server'
+import { createClient, createAdminClient } from '@/utils/supabase/server'
 
 export async function login(formData: FormData) {
     const supabase = await createClient()
@@ -92,4 +92,56 @@ export async function updatePassword(formData: FormData) {
 
     revalidatePath('/', 'layout')
     redirect('/')
+}
+
+export async function deleteAccount() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: "Not authenticated" }
+    }
+
+    try {
+        // Delete user data
+        // We do this manually because we cannot delete the auth user without admin key,
+        // but we can clear their data.
+        const results = await Promise.all([
+            supabase.from('notes').delete().eq('user_id', user.id),
+            supabase.from('tags').delete().eq('user_id', user.id),
+            supabase.from('chat_messages').delete().eq('user_id', user.id)
+        ])
+
+        const errors = results.filter(r => r.error).map(r => r.error?.message)
+
+        if (errors.length > 0) {
+            console.error("Deletion errors:", errors)
+            return { error: `Failed to delete data: ${errors.join(', ')}` }
+        }
+
+        // Attempt to delete the auth user using admin client
+        if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            try {
+                const supabaseAdmin = await createAdminClient()
+                const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(user.id)
+                if (deleteUserError) {
+                    console.error("Failed to delete auth user:", deleteUserError)
+                    // Cannot return error here since data is already gone, just proceed to sign out
+                }
+            } catch (e) {
+                console.error("Admin client creation failed or key invalid", e)
+            }
+        }
+
+        // Sign out
+        await supabase.auth.signOut()
+
+    } catch (e) {
+        console.error("Unexpected error during account deletion:", e)
+        return { error: "An unexpected error occurred during deletion." }
+    }
+
+    revalidatePath('/', 'layout')
+    // Return success instead of redirecting to avoid client-side catch block issues
+    return { success: true }
 }

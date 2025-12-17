@@ -1,5 +1,7 @@
 "use client";
 
+import { createClient } from "@/utils/supabase/client";
+
 import * as React from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Editor } from "@/components/editor";
@@ -51,9 +53,11 @@ export default function Home() {
         fetch('/api/chat')
       ]);
 
+      let fetchedNotes: Note[] = [];
+
       if (notesRes.ok) {
         const data = await notesRes.json();
-        setNotes(data.map((n: any) => ({
+        fetchedNotes = data.map((n: any) => ({
           id: n.id,
           title: n.title,
           content: n.content,
@@ -61,7 +65,8 @@ export default function Home() {
           pinned: n.is_pinned,
           trashed: false,
           tag_id: n.tag_id
-        })));
+        }));
+        setNotes(fetchedNotes);
       }
 
       if (tagsRes.ok) {
@@ -90,6 +95,71 @@ export default function Home() {
           attachments: m.attachments
         })));
       }
+
+      // Check for welcome note creation
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const hasSeenWelcome = localStorage.getItem(`hasSeenWelcome_${user.id}`);
+
+        if (!hasSeenWelcome && fetchedNotes.length === 0) {
+          const welcomeContent = `
+<h2 style="text-align: center">WELCOME TO PA-NOTE APP!</h2>
+<p style="text-align: center"><em><strong>Kindly Explore Our App!!</strong></em></p>
+<p><strong>Features:</strong></p>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="true"><label><input type="checkbox" checked="checked"><span></span></label><div><p>Note Taking</p></div></li>
+</ul>
+<ul>
+  <li><p>Photo Attachment</p></li>
+  <li><p>Tags</p></li>
+  <li><p>Note Searching (tag)</p></li>
+</ul>
+<ul data-type="taskList">
+  <li data-type="taskItem" data-checked="true"><label><input type="checkbox" checked="checked"><span></span></label><div><p>Baldy (AI)</p></div></li>
+</ul>
+<ul>
+  <li><p>Image to Text Converter</p></li>
+  <li><p>Chat Bot</p></li>
+  <li><p>AI Message transfer to existing notes or new notes</p></li>
+</ul>
+<p><strong>Developer:</strong></p>
+<ul>
+  <li><p>Jerean Camerino</p></li>
+  <li><p>Roman Cenica</p></li>
+  <li><p>Erol John Nool</p></li>
+  <li><p>Danielle Yvan Senador</p></li>
+</ul>
+`;
+          // Create welcome note
+          await fetch('/api/notes', {
+            method: 'POST',
+            body: JSON.stringify({ title: 'Welcome to PA-Note App!', content: welcomeContent })
+          }).then(async (res) => {
+            if (res.ok) {
+              const n = await res.json();
+              const newNote: Note = {
+                id: n.id,
+                title: n.title,
+                content: n.content || '',
+                date: new Date(n.updated_at).toLocaleDateString(),
+                pinned: n.is_pinned,
+                trashed: false,
+                tag_id: n.tag_id
+              };
+              setNotes([newNote]); // Set directly since we know it was empty
+              setCurrentNoteId(newNote.id);
+              // Wait a bit to ensure UI updates? No need.
+            }
+          });
+          localStorage.setItem(`hasSeenWelcome_${user.id}`, 'true');
+        } else if (fetchedNotes.length > 0) {
+          // If they have notes, assume they've seen it or don't need it
+          localStorage.setItem(`hasSeenWelcome_${user.id}`, 'true');
+        }
+      }
+
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
@@ -175,11 +245,11 @@ export default function Home() {
   };
 
   // Note Handlers
-  const handleAddNote = async (initialContent: string = '') => {
+  const handleAddNote = async (initialContent: string = '', title: string = 'New Note') => {
     try {
       const res = await fetch('/api/notes', {
         method: 'POST',
-        body: JSON.stringify({ title: 'New Note', content: initialContent })
+        body: JSON.stringify({ title, content: initialContent })
       });
       if (res.ok) {
         const n = await res.json();
@@ -192,7 +262,10 @@ export default function Home() {
           trashed: false,
           tag_id: n.tag_id
         };
-        setNotes([newNote, ...notes]);
+        // Use functional state update to ensure we have latest notes
+        // However, for welcome note, existing `setNotes` in `fetchData` handles initial load
+        // But for user action, this is correct
+        setNotes((prev) => [newNote, ...prev]);
         setCurrentNoteId(newNote.id);
         if (currentView === 'trash') setCurrentView('notes');
       }

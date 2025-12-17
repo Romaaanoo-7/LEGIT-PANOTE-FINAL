@@ -96,7 +96,7 @@ export function Editor({
             }),
             BulletList.configure({
                 HTMLAttributes: {
-                    class: 'list-outside leading-3 -mt-2',
+                    class: 'list-disc list-outside ml-4',
                 },
             }),
             Underline,
