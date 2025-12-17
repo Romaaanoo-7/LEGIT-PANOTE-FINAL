@@ -13,6 +13,11 @@ import {
     Italic,
     Underline as UnderlineIcon,
     CheckSquare,
+    List,
+    AlignLeft,
+    AlignCenter,
+    AlignRight,
+    AlignJustify,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,7 +41,9 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
+import BulletList from '@tiptap/extension-bullet-list';
 import Image from '@tiptap/extension-image';
+import TextAlign from '@tiptap/extension-text-align';
 
 interface Tag {
     id: string;
@@ -84,13 +91,23 @@ export function Editor({
 
     const editor = useEditor({
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                bulletList: false,
+            }),
+            BulletList.configure({
+                HTMLAttributes: {
+                    class: 'list-outside leading-3 -mt-2',
+                },
+            }),
             Underline,
             TaskList,
             TaskItem.configure({
                 nested: true,
             }),
             Image,
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+            }),
         ],
         content: note.content,
         onUpdate: ({ editor }) => {
@@ -235,6 +252,52 @@ export function Editor({
                             >
                                 <CheckSquare className="h-4 w-4" />
                                 <span className="sr-only">Checklist</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => editor.chain().focus().toggleBulletList().run()}
+                                className={editor.isActive('bulletList') ? 'bg-secondary' : ''}
+                            >
+                                <List className="h-4 w-4" />
+                                <span className="sr-only">Bullet List</span>
+                            </Button>
+                            <Separator orientation="vertical" className="mx-1 h-6" />
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                                className={editor.isActive({ textAlign: 'left' }) ? 'bg-secondary' : ''}
+                            >
+                                <AlignLeft className="h-4 w-4" />
+                                <span className="sr-only">Align Left</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                                className={editor.isActive({ textAlign: 'center' }) ? 'bg-secondary' : ''}
+                            >
+                                <AlignCenter className="h-4 w-4" />
+                                <span className="sr-only">Align Center</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                                className={editor.isActive({ textAlign: 'right' }) ? 'bg-secondary' : ''}
+                            >
+                                <AlignRight className="h-4 w-4" />
+                                <span className="sr-only">Align Right</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                                className={editor.isActive({ textAlign: 'justify' }) ? 'bg-secondary' : ''}
+                            >
+                                <AlignJustify className="h-4 w-4" />
+                                <span className="sr-only">Align Justify</span>
                             </Button>
                             <Button
                                 variant="ghost"
